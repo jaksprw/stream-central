@@ -24,6 +24,47 @@ export function isInWatchlist(id: number, type: "movie" | "tv"): boolean {
   return getWatchlist().some(i => i.id === id && i.type === type);
 }
 
+// Liked
+export function getLiked(): { id: number; type: "movie" | "tv" }[] {
+  try {
+    return JSON.parse(localStorage.getItem("liked") || "[]");
+  } catch { return []; }
+}
+
+export function toggleLiked(id: number, type: "movie" | "tv"): boolean {
+  const list = getLiked();
+  const idx = list.findIndex(i => i.id === id && i.type === type);
+  if (idx >= 0) {
+    list.splice(idx, 1);
+    localStorage.setItem("liked", JSON.stringify(list));
+    return false;
+  }
+  list.push({ id, type });
+  localStorage.setItem("liked", JSON.stringify(list));
+  return true;
+}
+
+export function isLiked(id: number, type: "movie" | "tv"): boolean {
+  return getLiked().some(i => i.id === id && i.type === type);
+}
+
+// Profile
+export interface UserProfile {
+  name: string;
+  avatar: string; // base64 or URL
+}
+
+export function getProfile(): UserProfile {
+  try {
+    return { name: "User", avatar: "", ...JSON.parse(localStorage.getItem("profile") || "{}") };
+  } catch { return { name: "User", avatar: "" }; }
+}
+
+export function saveProfile(p: UserProfile) {
+  localStorage.setItem("profile", JSON.stringify(p));
+  window.dispatchEvent(new Event("profile-changed"));
+}
+
 // Settings
 export interface Settings {
   language: string;
