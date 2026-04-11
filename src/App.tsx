@@ -13,6 +13,7 @@ import GenrePage from "@/pages/GenrePage";
 import ActorPage from "@/pages/ActorPage";
 import WatchlistPage from "@/pages/WatchlistPage";
 import ProfilePage from "@/pages/ProfilePage";
+import WatchProvidersPage from "@/pages/WatchProvidersPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/actor/:id" element={<ActorPage />} />
             <Route path="/watchlist" element={<WatchlistPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/providers" element={<WatchProvidersPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AppLayout>

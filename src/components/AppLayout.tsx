@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Settings, Menu, X, Heart, ChevronDown } from "lucide-react";
-import { useEffect } from "react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
   { to: "/tv", icon: Tv, label: "TV Shows" },
-  { to: "/watchlist", icon: Heart, label: "Watchlist" },
-  { to: "/profile", icon: Settings, label: "Profile" },
+  { to: "/providers", icon: Layers, label: "Providers" },
+  { to: "/profile", icon: User, label: "Profile" },
+];
+
+const mobileNav = [
+  { to: "/", icon: Home, label: "Home" },
+  { to: "/movies", icon: Film, label: "Movies" },
+  { to: "/tv", icon: Tv, label: "TV" },
+  { to: "/search", icon: Search, label: "Search" },
+  { to: "/profile", icon: User, label: "Profile" },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -45,16 +52,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       {/* Top navbar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
         <div className="flex items-center justify-between px-4 sm:px-8 h-14">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-primary font-bold text-lg">CineStream</Link>
-            <nav className="hidden md:flex items-center gap-4">
+            <Link to="/" className="text-primary font-bold text-lg tracking-tight">CineStream</Link>
+            <nav className="hidden md:flex items-center gap-1">
               {navItems.map(n => (
                 <Link
                   key={n.to}
                   to={n.to}
-                  className={`text-sm transition-colors ${location.pathname === n.to ? "text-primary font-medium" : "text-muted-foreground hover:text-foreground"}`}
+                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                    location.pathname === n.to
+                      ? "text-primary bg-primary/10 font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
                   {n.label}
                 </Link>
@@ -69,14 +80,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   placeholder="Search..."
-                  className="bg-muted border border-border rounded-md px-3 py-1.5 text-sm text-foreground w-40 sm:w-60 outline-none focus:ring-1 focus:ring-primary"
+                  className="bg-muted border border-border rounded-lg px-3 py-1.5 text-sm text-foreground w-40 sm:w-60 outline-none focus:ring-1 focus:ring-primary"
                 />
                 <button type="button" onClick={() => setSearchOpen(false)}>
                   <X className="w-5 h-5 text-muted-foreground" />
                 </button>
               </form>
             ) : (
-              <button onClick={() => setSearchOpen(true)} className="p-2 hover:bg-muted rounded-full transition-colors">
+              <button onClick={() => setSearchOpen(true)} className="hidden md:flex p-2 hover:bg-muted rounded-full transition-colors">
                 <Search className="w-5 h-5 text-muted-foreground" />
               </button>
             )}
@@ -89,41 +100,47 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
       {/* Mobile menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 pt-14 bg-background/95 backdrop-blur-md overflow-y-auto">
+        <div className="fixed inset-0 z-40 pt-14 bg-background/98 backdrop-blur-lg overflow-y-auto">
           <nav className="p-4 space-y-1">
             {navItems.map(n => (
               <Link
                 key={n.to}
                 to={n.to}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${location.pathname === n.to ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"}`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${
+                  location.pathname === n.to ? "bg-primary/10 text-primary font-medium" : "text-foreground hover:bg-muted"
+                }`}
               >
                 <n.icon className="w-5 h-5" />
                 {n.label}
               </Link>
             ))}
+            <Link to="/watchlist" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-foreground hover:bg-muted">
+              <Heart className="w-5 h-5" /> Watchlist
+            </Link>
+            <div className="border-t border-border/30 my-3" />
             {/* Movie genres */}
-            <button onClick={() => setShowMovieGenres(!showMovieGenres)} className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm text-foreground hover:bg-muted">
+            <button onClick={() => setShowMovieGenres(!showMovieGenres)} className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm text-foreground hover:bg-muted">
               <span className="flex items-center gap-3"><Film className="w-5 h-5" />Movie Genres</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showMovieGenres ? "rotate-180" : ""}`} />
             </button>
             {showMovieGenres && (
-              <div className="pl-8 space-y-1">
+              <div className="pl-8 space-y-0.5 max-h-60 overflow-y-auto">
                 {movieGenres.map(g => (
-                  <Link key={g.id} to={`/genre/movie/${g.id}?name=${g.name}`} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link key={g.id} to={`/genre/movie/${g.id}?name=${g.name}`} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50">
                     {g.name}
                   </Link>
                 ))}
               </div>
             )}
             {/* TV genres */}
-            <button onClick={() => setShowTvGenres(!showTvGenres)} className="flex items-center justify-between w-full px-4 py-3 rounded-lg text-sm text-foreground hover:bg-muted">
+            <button onClick={() => setShowTvGenres(!showTvGenres)} className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm text-foreground hover:bg-muted">
               <span className="flex items-center gap-3"><Tv className="w-5 h-5" />TV Genres</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showTvGenres ? "rotate-180" : ""}`} />
             </button>
             {showTvGenres && (
-              <div className="pl-8 space-y-1">
+              <div className="pl-8 space-y-0.5 max-h-60 overflow-y-auto">
                 {tvGenres.map(g => (
-                  <Link key={g.id} to={`/genre/tv/${g.id}?name=${g.name}`} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
+                  <Link key={g.id} to={`/genre/tv/${g.id}?name=${g.name}`} className="block px-4 py-2 text-sm text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted/50">
                     {g.name}
                   </Link>
                 ))}
@@ -137,13 +154,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <main className="pt-14">{children}</main>
 
       {/* Bottom mobile nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-t border-border/50">
-        <div className="flex items-center justify-around py-2">
-          {navItems.slice(0, 5).map(n => (
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-border/30">
+        <div className="flex items-center justify-around py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
+          {mobileNav.map(n => (
             <Link
               key={n.to}
               to={n.to}
-              className={`flex flex-col items-center gap-0.5 text-xs transition-colors ${location.pathname === n.to ? "text-primary" : "text-muted-foreground"}`}
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] transition-colors ${
+                location.pathname === n.to ? "text-primary" : "text-muted-foreground"
+              }`}
             >
               <n.icon className="w-5 h-5" />
               <span>{n.label}</span>
