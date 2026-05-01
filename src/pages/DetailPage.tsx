@@ -83,26 +83,24 @@ export default function DetailPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
 
-        {/* Content overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:p-12">
+        {/* Content overlay - desktop/tablet only */}
+        <div className="hidden sm:block absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:p-12">
           <div className="flex items-end gap-4 sm:gap-6">
             {/* Poster */}
             <img
               src={img(detail.poster_path, "w342")}
               alt={title}
-              className="hidden sm:block w-28 md:w-36 lg:w-44 rounded-xl shadow-2xl -mb-16 relative z-10 border border-border/20"
+              className="w-28 md:w-36 lg:w-44 rounded-xl shadow-2xl -mb-16 relative z-10 border border-border/20"
             />
             <div className="flex-1 mb-2">
-              {/* Logo or title */}
               {logo ? (
                 <img src={img(logo, "w300")} alt={title} className="max-w-[150px] h-auto mb-3 drop-shadow-lg" />
               ) : (
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 drop-shadow-lg">{title}</h1>
               )}
               {detail.tagline && (
-                <p className="text-muted-foreground text-sm italic mb-3 hidden sm:block">{detail.tagline}</p>
+                <p className="text-muted-foreground text-sm italic mb-3">{detail.tagline}</p>
               )}
-              {/* Meta info */}
               <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-3">
                 {detail.vote_average > 0 && (
                   <span className="flex items-center gap-1 text-yellow-500 font-medium">
