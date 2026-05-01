@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers } from "lucide-react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers, SlidersHorizontal, Send } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
   { to: "/tv", icon: Tv, label: "TV Shows" },
+  { to: "/filter", icon: SlidersHorizontal, label: "Filter" },
   { to: "/providers", icon: Layers, label: "Providers" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
+
+const TELEGRAM_URL = "https://t.me/";
 
 const mobileNav = [
   { to: "/", icon: Home, label: "Home" },
@@ -72,7 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               ))}
             </nav>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {searchOpen ? (
               <form onSubmit={handleSearch} className="flex items-center gap-2">
                 <input
@@ -82,16 +85,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   placeholder="Search..."
                   className="bg-muted border border-border rounded-lg px-3 py-1.5 text-sm text-foreground w-40 sm:w-60 outline-none focus:ring-1 focus:ring-primary"
                 />
-                <button type="button" onClick={() => setSearchOpen(false)}>
+                <button type="button" onClick={() => setSearchOpen(false)} aria-label="Close search">
                   <X className="w-5 h-5 text-muted-foreground" />
                 </button>
               </form>
             ) : (
-              <button onClick={() => setSearchOpen(true)} className="hidden md:flex p-2 hover:bg-muted rounded-full transition-colors">
-                <Search className="w-5 h-5 text-muted-foreground" />
-              </button>
+              <>
+                <Link to="/search" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Search">
+                  <Search className="w-5 h-5 text-muted-foreground" />
+                </Link>
+                <Link to="/filter" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Filter">
+                  <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
+                </Link>
+                <Link to="/watchlist" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Watchlist">
+                  <Heart className="w-5 h-5 text-muted-foreground" />
+                </Link>
+                <a
+                  href={TELEGRAM_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="p-2 hover:bg-muted rounded-full transition-colors"
+                  aria-label="Telegram"
+                >
+                  <Send className="w-5 h-5 text-muted-foreground" />
+                </a>
+              </>
             )}
-            <button className="md:hidden p-2 hover:bg-muted rounded-full transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <button className="md:hidden p-2 hover:bg-muted rounded-full transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">
               {mobileMenuOpen ? <X className="w-5 h-5 text-foreground" /> : <Menu className="w-5 h-5 text-foreground" />}
             </button>
           </div>
