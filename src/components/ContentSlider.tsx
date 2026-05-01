@@ -40,7 +40,7 @@ export default function ContentSlider({ title, items, type, showMoreLink }: Prop
       </div>
       <div ref={ref} className="flex gap-3 px-4 sm:px-8 overflow-x-auto slider-container">
         {items.map(item => (
-          <PostCard key={item.id} item={item} type={type} />
+          <PostCard key={item.id} item={item} type={type} slider />
         ))}
       </div>
     </section>
