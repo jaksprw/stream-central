@@ -182,5 +182,39 @@ export const getCollection = (id: number) =>
   get<{ id: number; name: string; overview: string; parts: Movie[] }>(`/collection/${id}`);
 
 // Watch providers
-export const getWatchProviders = (type: "movie" | "tv") =>
-  get<{ results: Provider[] }>(`/watch/providers/${type}`, { watch_region: "US" });
+export const getWatchProviders = (type: "movie" | "tv", region = "US") =>
+  get<{ results: Provider[] }>(`/watch/providers/${type}`, { watch_region: region });
+
+// Languages
+export const getLanguages = () =>
+  get<{ iso_639_1: string; english_name: string; name: string }[]>(`/configuration/languages`);
+
+// Discover (advanced filters)
+export interface DiscoverFilters {
+  with_genres?: string;
+  without_genres?: string;
+  with_original_language?: string;
+  with_watch_providers?: string;
+  watch_region?: string;
+  primary_release_year?: number;
+  first_air_date_year?: number;
+  "primary_release_date.gte"?: string;
+  "primary_release_date.lte"?: string;
+  "first_air_date.gte"?: string;
+  "first_air_date.lte"?: string;
+  "vote_average.gte"?: number;
+  "vote_average.lte"?: number;
+  "vote_count.gte"?: number;
+  with_runtime_gte?: number;
+  with_runtime_lte?: number;
+  sort_by?: string;
+  page?: number;
+}
+
+export const discover = (type: "movie" | "tv", filters: DiscoverFilters = {}) => {
+  const params: Record<string, string | number> = {};
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v !== undefined && v !== "" && v !== null) params[k] = v as string | number;
+  });
+  return get<PageResult<Movie>>(`/discover/${type}`, params);
+};
