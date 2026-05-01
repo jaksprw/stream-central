@@ -124,11 +124,15 @@ export default function DetailPage() {
 
       {/* Main content */}
       <div className="px-4 sm:px-8 md:px-12 mt-4 sm:mt-20">
-        {/* Mobile poster + title */}
-        <div className="sm:hidden flex items-start gap-3 mb-4">
-          <img src={img(detail.poster_path, "w185")} alt={title} className="w-24 rounded-lg shadow-lg" />
-          <div>
-            <h1 className="text-lg font-bold text-foreground">{title}</h1>
+        {/* Mobile poster + logo/title side-by-side */}
+        <div className="sm:hidden flex items-start gap-3 mb-4 -mt-20 relative z-10">
+          <img src={img(detail.poster_path, "w185")} alt={title} className="w-24 rounded-lg shadow-2xl border border-border/20 flex-shrink-0" />
+          <div className="flex-1 min-w-0 pt-2">
+            {logo ? (
+              <img src={img(logo, "w300")} alt={title} className="max-w-[140px] h-auto mb-2 drop-shadow-lg" />
+            ) : (
+              <h1 className="text-lg font-bold text-foreground line-clamp-2">{title}</h1>
+            )}
             <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
               {detail.vote_average > 0 && (
                 <span className="flex items-center gap-0.5 text-yellow-500">
@@ -137,47 +141,55 @@ export default function DetailPage() {
               )}
               {year && <span>{year}</span>}
               {detail.runtime > 0 && <span>{detail.runtime}min</span>}
+              {detail.number_of_seasons && <span>{detail.number_of_seasons} Seasons</span>}
             </div>
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Action buttons - icon only */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           <Link
             to={`/watch/${mediaType}/${detail.id}`}
-            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+            aria-label="Watch now"
+            className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
           >
-            <Play className="w-4 h-4 fill-current" /> Watch Now
+            <Play className="w-5 h-5 fill-current" />
           </Link>
           {trailer && (
             <a
               href={`https://www.youtube.com/watch?v=${trailer.key}`}
               target="_blank"
               rel="noopener"
-              className="inline-flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-secondary/80 transition-colors"
+              aria-label="Trailer"
+              className="inline-flex items-center justify-center bg-secondary text-secondary-foreground p-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
             >
-              <Play className="w-4 h-4" /> Trailer
+              <Play className="w-5 h-5" />
             </a>
           )}
           <button
             onClick={handleWatchlist}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
+            className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${
               inWatchlist ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Bookmark className={`w-4 h-4 ${inWatchlist ? "fill-primary" : ""}`} />
-            <span className="hidden sm:inline">{inWatchlist ? "Saved" : "Watchlist"}</span>
+            <Bookmark className={`w-5 h-5 ${inWatchlist ? "fill-primary" : ""}`} />
           </button>
           <button
             onClick={handleLike}
-            className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+            aria-label={liked ? "Unlike" : "Like"}
+            className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${
               liked ? "bg-red-500/20 text-red-500" : "bg-muted text-muted-foreground hover:text-foreground"
             }`}
           >
-            <Heart className={`w-4 h-4 ${liked ? "fill-red-500" : ""}`} />
+            <Heart className={`w-5 h-5 ${liked ? "fill-red-500" : ""}`} />
           </button>
-          <button onClick={handleShare} className="inline-flex items-center gap-2 bg-muted text-muted-foreground px-4 py-2.5 rounded-lg text-sm hover:text-foreground transition-colors">
-            <Share2 className="w-4 h-4" />
+          <button
+            onClick={handleShare}
+            aria-label="Share"
+            className="inline-flex items-center justify-center bg-muted text-muted-foreground p-2.5 rounded-lg hover:text-foreground transition-colors"
+          >
+            <Share2 className="w-5 h-5" />
           </button>
         </div>
 
