@@ -204,6 +204,7 @@ export default function DetailPage() {
           </button>
         </div>
 
+        <AdSlot slot="detail_top" />
         {/* Overview */}
         <div className="mb-6">
           <p className={`text-foreground/90 text-sm leading-relaxed ${!showFullOverview ? "line-clamp-3" : ""}`}>
