@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers, SlidersHorizontal, Send } from "lucide-react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers, SlidersHorizontal, Send, Shield } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
+import { useAuth } from "@/hooks/useAuth";
+import AdSlot from "@/components/AdSlot";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -25,6 +27,7 @@ const mobileNav = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -171,7 +174,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main content */}
-      <main className="pt-14">{children}</main>
+      <main className="pt-14"><AdSlot slot="header" />{children}<AdSlot slot="footer" /></main>
 
       {/* Bottom mobile nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-border/30">
