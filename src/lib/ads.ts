@@ -18,15 +18,15 @@ let cachePromise: Promise<Ad[]> | null = null;
 export function fetchAds(): Promise<Ad[]> {
   if (cache) return Promise.resolve(cache);
   if (cachePromise) return cachePromise;
-  cachePromise = supabase
-    .from("ads")
-    .select("*")
-    .eq("enabled", true)
-    .order("sort_order", { ascending: true })
-    .then(({ data }) => {
-      cache = (data || []) as Ad[];
-      return cache;
-    });
+  cachePromise = (async () => {
+    const { data } = await supabase
+      .from("ads")
+      .select("*")
+      .eq("enabled", true)
+      .order("sort_order", { ascending: true });
+    cache = (data || []) as Ad[];
+    return cache;
+  })();
   return cachePromise;
 }
 
