@@ -140,6 +140,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <Link to="/watchlist" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-foreground hover:bg-muted">
               <Heart className="w-5 h-5" /> Watchlist
             </Link>
+            {isAdmin && (
+              <Link to="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-primary hover:bg-muted">
+                <Shield className="w-5 h-5" /> Admin
+              </Link>
+            )}
             <div className="border-t border-border/30 my-3" />
             {/* Movie genres */}
             <button onClick={() => setShowMovieGenres(!showMovieGenres)} className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm text-foreground hover:bg-muted">
