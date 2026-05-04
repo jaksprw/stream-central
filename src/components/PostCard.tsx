@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { img, imgLow } from "@/lib/tmdb";
 import type { Movie } from "@/lib/tmdb";
 import { useSettings } from "@/lib/store";
-import { Star, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 interface Props {
   item: Movie;
