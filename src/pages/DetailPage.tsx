@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getDetail, getSeasonDetail, img, imgLow, type MovieDetail, type Episode } from "@/lib/tmdb";
 import { toggleWatchlist, isInWatchlist, toggleLiked, isLiked, useSettings } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
+import AdSlot from "@/components/AdSlot";
 import { Play, Heart, Share2, Star, Clock, Calendar, ChevronDown, Bookmark, ThumbsUp, Info } from "lucide-react";
 
 export default function DetailPage() {
