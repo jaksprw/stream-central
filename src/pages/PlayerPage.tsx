@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { getDetail, getSeasonDetail, img, type MovieDetail, type Episode } from "@/lib/tmdb";
-import { servers, getServerUrl } from "@/lib/servers";
+import { fetchServers, getServerUrl, fallbackServers, type Server } from "@/lib/servers";
 import { toggleWatchlist, isInWatchlist } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
+import AdSlot from "@/components/AdSlot";
 import { getTrending, type Movie } from "@/lib/tmdb";
-import { Heart, ChevronDown, Server, Shield } from "lucide-react";
+import { Heart, ChevronDown, Server as ServerIcon, Shield, Download, Play } from "lucide-react";
 
 export default function PlayerPage() {
   const { type, id } = useParams<{ type: string; id: string }>();
@@ -15,12 +16,22 @@ export default function PlayerPage() {
   const mediaType = type as "movie" | "tv";
 
   const [detail, setDetail] = useState<MovieDetail | null>(null);
-  const [selectedServer, setSelectedServer] = useState(0);
+  const [allServers, setAllServers] = useState<Server[]>(fallbackServers);
+  const [selectedId, setSelectedId] = useState<string>("");
+  const [tab, setTab] = useState<"stream" | "download">("stream");
   const [sandboxOn, setSandboxOn] = useState(false);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [trending, setTrending] = useState<Movie[]>([]);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [openSeason, setOpenSeason] = useState<number | null>(season);
+
+  useEffect(() => {
+    fetchServers().then(s => {
+      setAllServers(s);
+      const first = s.find(x => !x.is_download);
+      if (first) setSelectedId(first.id || first.name);
+    });
+  }, []);
 
   useEffect(() => {
     if (!id) return;
@@ -30,31 +41,31 @@ export default function PlayerPage() {
     });
     getTrending("movie", "week").then(r => setTrending(r.results));
     window.scrollTo(0, 0);
-  }, [id, type]);
+  }, [id, type, mediaType]);
 
   useEffect(() => {
     if (mediaType === "tv" && id) {
       getSeasonDetail(Number(id), season).then(s => setEpisodes(s.episodes));
     }
-  }, [id, season, type]);
+  }, [id, season, mediaType]);
 
   if (!detail) return <div className="flex items-center justify-center min-h-screen"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
 
   const title = detail.title || detail.name || "";
   const imdbId = detail.imdb_id || detail.external_ids?.imdb_id;
-  const server = servers[selectedServer];
-  const iframeSrc = getServerUrl(server, { tmdbId: detail.id, imdbId, season, episode, isTV: mediaType === "tv" });
+  const streamServers = allServers.filter(s => !s.is_download);
+  const downloadServers = allServers.filter(s => s.is_download);
+  const visibleServers = tab === "stream" ? streamServers : downloadServers;
+  const server = visibleServers.find(s => (s.id || s.name) === selectedId) || visibleServers[0];
+  const iframeSrc = server ? getServerUrl(server, { tmdbId: detail.id, imdbId, season, episode, isTV: mediaType === "tv" }) : "";
 
-  const handleWatchlist = () => {
-    const added = toggleWatchlist(detail.id, mediaType);
-    setInWatchlist(added);
-  };
+  const handleWatchlist = () => setInWatchlist(toggleWatchlist(detail.id, mediaType));
 
   return (
     <div className="pb-20">
       {/* Player */}
       <div className="w-full aspect-video bg-background relative">
-        {sandboxOn ? (
+        {server && (sandboxOn ? (
           <iframe
             src={iframeSrc}
             className="w-full h-full"
@@ -62,36 +73,62 @@ export default function PlayerPage() {
             sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
           />
         ) : (
-          <iframe
-            src={iframeSrc}
-            className="w-full h-full"
-            allowFullScreen
-          />
-        )}
+          <iframe src={iframeSrc} className="w-full h-full" allowFullScreen />
+        ))}
       </div>
 
       <div className="px-4 sm:px-8 mt-4">
-        {/* Server selector */}
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Server className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm text-foreground font-medium">Servers</span>
+        <AdSlot slot="player_top" />
+
+        {/* Stream / Download tabs */}
+        {downloadServers.length > 0 && (
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => { setTab("stream"); const f = streamServers[0]; if (f) setSelectedId(f.id || f.name); }}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "stream" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+            >
+              <Play className="w-4 h-4" /> Stream
+            </button>
+            <button
+              onClick={() => { setTab("download"); const f = downloadServers[0]; if (f) setSelectedId(f.id || f.name); }}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "download" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+            >
+              <Download className="w-4 h-4" /> Download
+            </button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {servers.map((s, i) => (
-              <button
-                key={s.name}
-                onClick={() => setSelectedServer(i)}
-                className={`px-3 py-1.5 rounded-lg text-xs transition-colors ${i === selectedServer ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground"}`}
-              >
-                {s.name}
-              </button>
-            ))}
+        )}
+
+        {/* Server grid */}
+        <div className="mb-5">
+          <div className="flex items-center gap-2 mb-3">
+            <ServerIcon className="w-4 h-4 text-primary" />
+            <span className="text-sm text-foreground font-semibold uppercase tracking-wide">{tab === "download" ? "Download Sources" : "Streaming Servers"}</span>
+            <span className="text-xs text-muted-foreground">({visibleServers.length})</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
+            {visibleServers.map((s, i) => {
+              const key = s.id || s.name;
+              const active = key === selectedId;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedId(key)}
+                  className={`group relative flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border ${
+                    active
+                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30 scale-[1.02]"
+                      : "bg-card text-foreground border-border hover:border-primary/60 hover:bg-primary/5 hover:shadow-md hover:-translate-y-0.5"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-primary-foreground animate-pulse" : "bg-primary/60"}`} />
+                  <span className="truncate">{s.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Sandbox toggle + Watchlist */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-6 flex-wrap">
           <label className="flex items-center gap-2 cursor-pointer">
             <Shield className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">Sandbox</span>
@@ -146,6 +183,8 @@ export default function PlayerPage() {
             ))}
           </div>
         )}
+
+        <AdSlot slot="player_bottom" />
 
         {/* Trending */}
         <ContentSlider title="Trending Movies" items={trending} type="movie" />

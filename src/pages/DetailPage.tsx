@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { getDetail, getSeasonDetail, img, imgLow, type MovieDetail, type Episode } from "@/lib/tmdb";
 import { toggleWatchlist, isInWatchlist, toggleLiked, isLiked, useSettings } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
+import AdSlot from "@/components/AdSlot";
 import { Play, Heart, Share2, Star, Clock, Calendar, ChevronDown, Bookmark, ThumbsUp, Info } from "lucide-react";
 
 export default function DetailPage() {
@@ -53,9 +54,21 @@ export default function DetailPage() {
     setLikedState(toggleLiked(detail.id, mediaType));
   };
 
-  const handleShare = () => {
-    navigator.share?.({ title: detail?.title || detail?.name, url: window.location.href })
-      .catch(() => navigator.clipboard.writeText(window.location.href));
+  const handleShare = async () => {
+    const shareData = { title: detail?.title || detail?.name || "Watch", text: detail?.overview || "", url: window.location.href };
+    try {
+      if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch { /* user cancelled or unsupported */ }
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      const { toast } = await import("sonner");
+      toast.success("Link copied to clipboard");
+    } catch {
+      window.prompt("Copy this link:", window.location.href);
+    }
   };
 
   if (!detail) return (
@@ -191,6 +204,7 @@ export default function DetailPage() {
           </button>
         </div>
 
+        <AdSlot slot="detail_top" />
         {/* Overview */}
         <div className="mb-6">
           <p className={`text-foreground/90 text-sm leading-relaxed ${!showFullOverview ? "line-clamp-3" : ""}`}>

@@ -3,6 +3,7 @@ import HeroSlider from "@/components/HeroSlider";
 import ContentSlider from "@/components/ContentSlider";
 import { getTrending, getPopular, getNowPlaying, getGenres, discoverByGenre, type Movie, type Genre } from "@/lib/tmdb";
 import { useSettings } from "@/lib/store";
+import AdSlot from "@/components/AdSlot";
 
 const POPULAR_GENRE_IDS_MOVIE = [28, 35, 27, 878, 10749]; // Action, Comedy, Horror, Sci-Fi, Romance
 
@@ -40,9 +41,11 @@ export default function HomePage() {
   return (
     <div className="pb-20">
       <HeroSlider items={hero} />
+      <div className="px-4 sm:px-8"><AdSlot slot="home_top" /></div>
       <ContentSlider title="Trending Movies" items={trendingMovies} type="movie" showMoreLink="/movies" />
       <ContentSlider title="Trending TV Shows" items={trendingTV} type="tv" showMoreLink="/tv" />
       <ContentSlider title="Popular Movies" items={popularMovies} type="movie" showMoreLink="/movies" />
+      <div className="px-4 sm:px-8"><AdSlot slot="home_middle" /></div>
       <ContentSlider title="Popular TV Shows" items={popularTV} type="tv" showMoreLink="/tv" />
       <ContentSlider title="Now Playing" items={nowPlaying} type="movie" showMoreLink="/movies" />
       {genreSections.map(s => (
@@ -54,6 +57,7 @@ export default function HomePage() {
           showMoreLink={`/genre/movie/${s.genre.id}?name=${s.genre.name}`}
         />
       ))}
+      <div className="px-4 sm:px-8"><AdSlot slot="home_bottom" /></div>
     </div>
   );
 }
