@@ -33,7 +33,7 @@ export default function AuthPage() {
     <div className="min-h-[80vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm bg-card rounded-2xl p-6 border border-border/40 shadow-2xl">
         <h1 className="text-xl font-bold text-foreground mb-1">{mode === "login" ? "Admin Sign in" : "Create account"}</h1>
-        <p className="text-xs text-muted-foreground mb-5">First registered user becomes admin automatically.</p>
+        <p className="text-xs text-muted-foreground mb-5">Sign up to manage servers, ads & site settings. The first registered user becomes admin automatically. You can change your password from the Admin → Settings tab after login.</p>
         <form onSubmit={handleSubmit} className="space-y-3">
           <input type="email" required placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary" />
           <input type="password" required minLength={6} placeholder="Password (min 6)" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary" />

@@ -4,6 +4,7 @@ import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Lay
 import { getGenres, type Genre } from "@/lib/tmdb";
 import { useAuth } from "@/hooks/useAuth";
 import AdSlot from "@/components/AdSlot";
+import { useSiteSettings } from "@/lib/siteSettings";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -13,8 +14,6 @@ const navItems = [
   { to: "/providers", icon: Layers, label: "Providers" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
-
-const TELEGRAM_URL = "https://t.me/";
 
 const mobileNav = [
   { to: "/", icon: Home, label: "Home" },
@@ -28,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const site = useSiteSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -46,6 +46,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (site.site_title) document.title = site.site_title;
+  }, [site.site_title]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -61,7 +65,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
         <div className="flex items-center justify-between px-4 sm:px-8 h-14">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-primary font-bold text-lg tracking-tight">CineStream</Link>
+            <Link to="/" className="flex items-center gap-2 text-primary font-bold text-lg tracking-tight">
+              {site.site_logo ? (
+                <img src={site.site_logo} alt={site.site_title} className="h-8 w-auto max-w-[140px] object-contain" />
+              ) : (
+                <span>{site.site_title || "CineStream"}</span>
+              )}
+            </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map(n => (
                 <Link
@@ -103,15 +113,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link to="/watchlist" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Watchlist">
                   <Heart className="w-5 h-5 text-muted-foreground" />
                 </Link>
-                <a
-                  href={TELEGRAM_URL}
-                  target="_blank"
-                  rel="noopener"
-                  className="p-2 hover:bg-muted rounded-full transition-colors"
-                  aria-label="Telegram"
-                >
-                  <Send className="w-5 h-5 text-muted-foreground" />
-                </a>
+                {site.telegram_url && (
+                  <a
+                    href={site.telegram_url}
+                    target="_blank"
+                    rel="noopener"
+                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                    aria-label="Telegram"
+                  >
+                    <Send className="w-5 h-5 text-muted-foreground" />
+                  </a>
+                )}
               </>
             )}
             <button className="md:hidden p-2 hover:bg-muted rounded-full transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">
@@ -179,7 +191,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main content */}
-      <main className="pt-14"><AdSlot slot="header" />{children}<AdSlot slot="footer" /></main>
+      <main className="pt-14">
+        {site.header_html && <div dangerouslySetInnerHTML={{ __html: site.header_html }} />}
+        <AdSlot slot="header" />
+        {children}
+        <AdSlot slot="footer" />
+        {site.footer_html && <div className="mt-8 px-4 sm:px-8 py-6 border-t border-border/30 text-center text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: site.footer_html }} />}
+      </main>
 
       {/* Bottom mobile nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-border/30">

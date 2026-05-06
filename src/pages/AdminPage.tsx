@@ -3,14 +3,15 @@ import { Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { invalidateAdsCache, AD_SLOTS } from "@/lib/ads";
-import { Plus, Trash2, Save, LogOut, Server as ServerIcon, Megaphone, Settings as SettingsIcon } from "lucide-react";
+import { invalidateSiteSettings } from "@/lib/siteSettings";
+import { Plus, Trash2, Save, LogOut, Server as ServerIcon, Megaphone, Settings as SettingsIcon, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 interface ServerRow { id: string; name: string; type: string; url: string; url_tv: string; is_download: boolean; enabled: boolean; sort_order: number }
 interface AdRow { id: string; slot: string; name: string; html: string | null; image_url: string | null; click_url: string | null; enabled: boolean; sort_order: number }
 interface SettingRow { key: string; value: string | null }
 
-const SETTING_KEYS = ["site_title", "site_logo", "telegram_url", "footer_html"];
+const SETTING_KEYS = ["site_title", "site_logo", "telegram_url", "header_html", "footer_html"];
 
 export default function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
@@ -90,7 +91,21 @@ export default function AdminPage() {
   const saveSetting = async (key: string) => {
     const { error } = await supabase.from("site_settings").upsert({ key, value: settings[key] || "" });
     if (error) return toast.error(error.message);
+    invalidateSiteSettings();
     toast.success(`${key} saved`);
+  };
+
+  // --- Password ---
+  const [newPassword, setNewPassword] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+  const changePassword = async () => {
+    if (newPassword.length < 6) return toast.error("Password must be at least 6 characters");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwLoading(false);
+    if (error) return toast.error(error.message);
+    setNewPassword("");
+    toast.success("Password updated");
   };
 
   const tabs = [
@@ -186,14 +201,24 @@ export default function AdminPage() {
           {SETTING_KEYS.map(k => (
             <div key={k} className="bg-card border border-border rounded-xl p-4 space-y-2">
               <label className="text-sm font-medium text-foreground capitalize">{k.replace(/_/g, " ")}</label>
-              {k === "footer_html" ? (
-                <textarea value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} rows={4} className="filter-select font-mono text-xs" />
+              {k.endsWith("_html") ? (
+                <textarea value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} rows={4} className="filter-select font-mono text-xs" placeholder={k === "header_html" ? "Analytics, meta, schema scripts..." : "Footer copyright, links HTML..."} />
               ) : (
-                <input value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} className="filter-select" />
+                <input value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} className="filter-select" placeholder={k === "site_logo" ? "https://... (image URL)" : k === "telegram_url" ? "https://t.me/yourchannel" : ""} />
               )}
               <button onClick={() => saveSetting(k)} className="inline-flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs hover:bg-primary/90"><Save className="w-3 h-3" /> Save</button>
             </div>
           ))}
+
+          {/* Change password */}
+          <div className="bg-card border border-border rounded-xl p-4 space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2"><KeyRound className="w-4 h-4" /> Change Password</label>
+            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 chars)" className="filter-select" />
+            <button onClick={changePassword} disabled={pwLoading} className="inline-flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs hover:bg-primary/90 disabled:opacity-50">
+              <Save className="w-3 h-3" /> {pwLoading ? "Updating..." : "Update Password"}
+            </button>
+          </div>
+
           <Link to="/" className="block text-xs text-primary hover:underline pt-4">← Back to site</Link>
         </div>
       )}
