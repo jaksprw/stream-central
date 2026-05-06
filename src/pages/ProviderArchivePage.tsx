@@ -44,10 +44,11 @@ export default function ProviderArchivePage() {
     }).finally(() => setLoading(false));
   }, [id, type, region, page]);
 
-  const sentinelRef = useInfiniteScroll({
-    hasMore: page < totalPages && !loading,
-    onLoadMore: () => setPage(p => p + 1),
-  });
+  const sentinelRef = useInfiniteScroll(
+    () => setPage(p => p + 1),
+    page < totalPages,
+    loading,
+  );
 
   const setParam = (k: string, v: string) => {
     const sp = new URLSearchParams(searchParams);
