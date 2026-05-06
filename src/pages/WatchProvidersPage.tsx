@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { img, type Provider } from "@/lib/tmdb";
 
 const API_KEY = "fed86956458f19fb45cdd382b6e6de83";
