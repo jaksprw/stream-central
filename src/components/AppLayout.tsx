@@ -46,6 +46,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setSearchOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (site.site_title) document.title = site.site_title;
+  }, [site.site_title]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
