@@ -4,6 +4,7 @@ import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Lay
 import { getGenres, type Genre } from "@/lib/tmdb";
 import { useAuth } from "@/hooks/useAuth";
 import AdSlot from "@/components/AdSlot";
+import { useSiteSettings } from "@/lib/siteSettings";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -13,8 +14,6 @@ const navItems = [
   { to: "/providers", icon: Layers, label: "Providers" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
-
-const TELEGRAM_URL = "https://t.me/";
 
 const mobileNav = [
   { to: "/", icon: Home, label: "Home" },
@@ -28,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin } = useAuth();
+  const site = useSiteSettings();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
