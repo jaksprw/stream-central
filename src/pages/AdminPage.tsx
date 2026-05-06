@@ -91,7 +91,21 @@ export default function AdminPage() {
   const saveSetting = async (key: string) => {
     const { error } = await supabase.from("site_settings").upsert({ key, value: settings[key] || "" });
     if (error) return toast.error(error.message);
+    invalidateSiteSettings();
     toast.success(`${key} saved`);
+  };
+
+  // --- Password ---
+  const [newPassword, setNewPassword] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
+  const changePassword = async () => {
+    if (newPassword.length < 6) return toast.error("Password must be at least 6 characters");
+    setPwLoading(true);
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setPwLoading(false);
+    if (error) return toast.error(error.message);
+    setNewPassword("");
+    toast.success("Password updated");
   };
 
   const tabs = [
