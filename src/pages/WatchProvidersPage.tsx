@@ -78,8 +78,12 @@ export default function WatchProvidersPage() {
       ) : (
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
           {providers.map(p => (
-            <div key={p.provider_id} className="flex flex-col items-center gap-2 group">
-              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg group-hover:ring-2 group-hover:ring-primary transition-all">
+            <Link
+              key={p.provider_id}
+              to={`/provider/${p.provider_id}?type=${tab}&region=${region}`}
+              className="flex flex-col items-center gap-2 group"
+            >
+              <div className="w-full aspect-square rounded-2xl overflow-hidden bg-muted shadow-lg ring-1 ring-border/40 group-hover:ring-2 group-hover:ring-primary group-hover:shadow-primary/30 group-hover:shadow-xl group-hover:-translate-y-0.5 transition-all">
                 <img
                   src={img(p.logo_path, "w185")}
                   alt={p.provider_name}
@@ -87,8 +91,8 @@ export default function WatchProvidersPage() {
                   loading="lazy"
                 />
               </div>
-              <p className="text-xs text-muted-foreground text-center truncate w-full">{p.provider_name}</p>
-            </div>
+              <p className="text-xs text-muted-foreground text-center truncate w-full group-hover:text-foreground transition-colors">{p.provider_name}</p>
+            </Link>
           ))}
         </div>
       )}
