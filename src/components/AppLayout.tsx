@@ -187,7 +187,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main content */}
-      <main className="pt-14"><AdSlot slot="header" />{children}<AdSlot slot="footer" /></main>
+      <main className="pt-14">
+        {site.header_html && <div dangerouslySetInnerHTML={{ __html: site.header_html }} />}
+        <AdSlot slot="header" />
+        {children}
+        <AdSlot slot="footer" />
+        {site.footer_html && <div className="mt-8 px-4 sm:px-8 py-6 border-t border-border/30 text-center text-xs text-muted-foreground" dangerouslySetInnerHTML={{ __html: site.footer_html }} />}
+      </main>
 
       {/* Bottom mobile nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-border/30">
