@@ -201,14 +201,24 @@ export default function AdminPage() {
           {SETTING_KEYS.map(k => (
             <div key={k} className="bg-card border border-border rounded-xl p-4 space-y-2">
               <label className="text-sm font-medium text-foreground capitalize">{k.replace(/_/g, " ")}</label>
-              {k === "footer_html" ? (
-                <textarea value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} rows={4} className="filter-select font-mono text-xs" />
+              {k.endsWith("_html") ? (
+                <textarea value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} rows={4} className="filter-select font-mono text-xs" placeholder={k === "header_html" ? "Analytics, meta, schema scripts..." : "Footer copyright, links HTML..."} />
               ) : (
-                <input value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} className="filter-select" />
+                <input value={settings[k] || ""} onChange={e => setSettings({ ...settings, [k]: e.target.value })} className="filter-select" placeholder={k === "site_logo" ? "https://... (image URL)" : k === "telegram_url" ? "https://t.me/yourchannel" : ""} />
               )}
               <button onClick={() => saveSetting(k)} className="inline-flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs hover:bg-primary/90"><Save className="w-3 h-3" /> Save</button>
             </div>
           ))}
+
+          {/* Change password */}
+          <div className="bg-card border border-border rounded-xl p-4 space-y-2">
+            <label className="text-sm font-medium text-foreground flex items-center gap-2"><KeyRound className="w-4 h-4" /> Change Password</label>
+            <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="New password (min 6 chars)" className="filter-select" />
+            <button onClick={changePassword} disabled={pwLoading} className="inline-flex items-center gap-1 bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs hover:bg-primary/90 disabled:opacity-50">
+              <Save className="w-3 h-3" /> {pwLoading ? "Updating..." : "Update Password"}
+            </button>
+          </div>
+
           <Link to="/" className="block text-xs text-primary hover:underline pt-4">← Back to site</Link>
         </div>
       )}
