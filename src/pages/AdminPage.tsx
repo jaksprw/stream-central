@@ -3,14 +3,15 @@ import { Navigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { invalidateAdsCache, AD_SLOTS } from "@/lib/ads";
-import { Plus, Trash2, Save, LogOut, Server as ServerIcon, Megaphone, Settings as SettingsIcon } from "lucide-react";
+import { invalidateSiteSettings } from "@/lib/siteSettings";
+import { Plus, Trash2, Save, LogOut, Server as ServerIcon, Megaphone, Settings as SettingsIcon, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 interface ServerRow { id: string; name: string; type: string; url: string; url_tv: string; is_download: boolean; enabled: boolean; sort_order: number }
 interface AdRow { id: string; slot: string; name: string; html: string | null; image_url: string | null; click_url: string | null; enabled: boolean; sort_order: number }
 interface SettingRow { key: string; value: string | null }
 
-const SETTING_KEYS = ["site_title", "site_logo", "telegram_url", "footer_html"];
+const SETTING_KEYS = ["site_title", "site_logo", "telegram_url", "header_html", "footer_html"];
 
 export default function AdminPage() {
   const { user, isAdmin, loading } = useAuth();
