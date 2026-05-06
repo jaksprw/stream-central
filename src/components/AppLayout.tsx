@@ -61,7 +61,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/30">
         <div className="flex items-center justify-between px-4 sm:px-8 h-14">
           <div className="flex items-center gap-6">
-            <Link to="/" className="text-primary font-bold text-lg tracking-tight">CineStream</Link>
+            <Link to="/" className="flex items-center gap-2 text-primary font-bold text-lg tracking-tight">
+              {site.site_logo ? (
+                <img src={site.site_logo} alt={site.site_title} className="h-8 w-auto max-w-[140px] object-contain" />
+              ) : (
+                <span>{site.site_title || "CineStream"}</span>
+              )}
+            </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navItems.map(n => (
                 <Link
@@ -103,15 +109,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link to="/watchlist" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Watchlist">
                   <Heart className="w-5 h-5 text-muted-foreground" />
                 </Link>
-                <a
-                  href={TELEGRAM_URL}
-                  target="_blank"
-                  rel="noopener"
-                  className="p-2 hover:bg-muted rounded-full transition-colors"
-                  aria-label="Telegram"
-                >
-                  <Send className="w-5 h-5 text-muted-foreground" />
-                </a>
+                {site.telegram_url && (
+                  <a
+                    href={site.telegram_url}
+                    target="_blank"
+                    rel="noopener"
+                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                    aria-label="Telegram"
+                  >
+                    <Send className="w-5 h-5 text-muted-foreground" />
+                  </a>
+                )}
               </>
             )}
             <button className="md:hidden p-2 hover:bg-muted rounded-full transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">
