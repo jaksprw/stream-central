@@ -85,13 +85,13 @@ export default function PlayerPage() {
           <div className="flex gap-2 mb-4">
             <button
               onClick={() => { setTab("stream"); const f = streamServers[0]; if (f) setSelectedId(f.id || f.name); }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "stream" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+              className={tab === "stream" ? "btn-neon" : "btn-glass"}
             >
               <Play className="w-4 h-4" /> Stream
             </button>
             <button
               onClick={() => { setTab("download"); const f = downloadServers[0]; if (f) setSelectedId(f.id || f.name); }}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "download" ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30" : "bg-muted text-muted-foreground hover:text-foreground"}`}
+              className={tab === "download" ? "btn-neon" : "btn-glass"}
             >
               <Download className="w-4 h-4" /> Download
             </button>
@@ -106,20 +106,20 @@ export default function PlayerPage() {
             <span className="text-xs text-muted-foreground">({visibleServers.length})</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5">
-            {visibleServers.map((s, i) => {
+            {visibleServers.map((s) => {
               const key = s.id || s.name;
               const active = key === selectedId;
               return (
                 <button
                   key={key}
                   onClick={() => setSelectedId(key)}
-                  className={`group relative flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-200 border ${
+                  className={`group relative flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs sm:text-sm font-medium transition-all duration-300 overflow-hidden ${
                     active
-                      ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/30 scale-[1.02]"
-                      : "bg-card text-foreground border-border hover:border-primary/60 hover:bg-primary/5 hover:shadow-md hover:-translate-y-0.5"
+                      ? "bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/40 scale-[1.03] ring-1 ring-white/30"
+                      : "glass hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/40 text-foreground"
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-primary-foreground animate-pulse" : "bg-primary/60"}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${active ? "bg-white animate-pulse" : "bg-primary/70"}`} />
                   <span className="truncate">{s.name}</span>
                 </button>
               );
