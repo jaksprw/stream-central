@@ -65,11 +65,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <header className="fixed top-0 left-0 right-0 z-50 glass-panel !rounded-none border-x-0 border-t-0">
         <div className="flex items-center justify-between px-4 sm:px-8 h-14">
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 text-primary font-bold text-lg tracking-tight">
+            <Link to="/" className="flex items-center gap-2 font-bold text-lg tracking-tight">
               {site.site_logo ? (
                 <img src={site.site_logo} alt={site.site_title} className="h-8 w-auto max-w-[140px] object-contain" />
               ) : (
-                <span>{site.site_title || "CineStream"}</span>
+                <span className="text-gradient">{site.site_title || "CineStream"}</span>
               )}
             </Link>
             <nav className="hidden md:flex items-center gap-1">
