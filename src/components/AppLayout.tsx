@@ -77,10 +77,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link
                   key={n.to}
                   to={n.to}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  className={`px-3 py-1.5 rounded-full text-sm transition-all ${
                     location.pathname === n.to
-                      ? "text-primary bg-primary/10 font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "text-primary-foreground bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/30"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                   }`}
                 >
                   {n.label}
