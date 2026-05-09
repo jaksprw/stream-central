@@ -200,7 +200,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Bottom mobile nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-lg border-t border-border/30">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel !rounded-none border-x-0 border-b-0">
         <div className="flex items-center justify-around py-1.5 pb-[max(0.375rem,env(safe-area-inset-bottom))]">
           {mobileNav.map(n => (
             <Link
