@@ -45,12 +45,15 @@ export function useAds(slot: string) {
 
 export const AD_SLOTS = [
   "header",
+  "banner_top",
+  "banner_bottom",
   "home_top",
   "home_middle",
   "home_bottom",
   "detail_top",
   "detail_bottom",
   "player_top",
+  "post_player_info",
   "player_bottom",
   "sidebar",
   "footer",
