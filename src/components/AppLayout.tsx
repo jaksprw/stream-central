@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers, SlidersHorizontal, Send, Shield } from "lucide-react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Layers, SlidersHorizontal, Send, Shield, Radio } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
 import { useAuth } from "@/hooks/useAuth";
 import AdSlot from "@/components/AdSlot";
@@ -10,15 +10,15 @@ const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
   { to: "/tv", icon: Tv, label: "TV Shows" },
+  { to: "/live-tv", icon: Radio, label: "Live TV" },
   { to: "/filter", icon: SlidersHorizontal, label: "Filter" },
   { to: "/providers", icon: Layers, label: "Providers" },
-  { to: "/profile", icon: User, label: "Profile" },
 ];
 
 const mobileNav = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
-  { to: "/tv", icon: Tv, label: "TV" },
+  { to: "/live-tv", icon: Radio, label: "Live" },
   { to: "/search", icon: Search, label: "Search" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
