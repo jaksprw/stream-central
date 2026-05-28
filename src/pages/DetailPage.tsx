@@ -4,6 +4,7 @@ import { getDetail, getSeasonDetail, img, imgLow, type MovieDetail, type Episode
 import { toggleWatchlist, isInWatchlist, toggleLiked, isLiked, useSettings } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
 import AdSlot from "@/components/AdSlot";
+import CustomDownloads from "@/components/CustomDownloads";
 import { Play, Heart, Share2, Star, Clock, Calendar, ChevronDown, Bookmark, ThumbsUp, Info } from "lucide-react";
 
 export default function DetailPage() {
@@ -205,6 +206,7 @@ export default function DetailPage() {
         </div>
 
         <AdSlot slot="detail_top" />
+        <CustomDownloads tmdbId={detail.id} mediaType={mediaType} />
         {/* Overview */}
         <div className="mb-6">
           <p className={`text-foreground/90 text-sm leading-relaxed ${!showFullOverview ? "line-clamp-3" : ""}`}>

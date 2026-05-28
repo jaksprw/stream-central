@@ -5,6 +5,8 @@ import { fetchServers, getServerUrl, fallbackServers, type Server } from "@/lib/
 import { toggleWatchlist, isInWatchlist } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
 import AdSlot from "@/components/AdSlot";
+import CustomDownloads from "@/components/CustomDownloads";
+import { useSiteSettings } from "@/lib/siteSettings";
 import { getTrending, type Movie } from "@/lib/tmdb";
 import { Heart, ChevronDown, Server as ServerIcon, Shield, Download, Play } from "lucide-react";
 
@@ -14,6 +16,7 @@ export default function PlayerPage() {
   const season = Number(searchParams.get("s")) || 1;
   const episode = Number(searchParams.get("e")) || 1;
   const mediaType = type as "movie" | "tv";
+  const site = useSiteSettings();
 
   const [detail, setDetail] = useState<MovieDetail | null>(null);
   const [allServers, setAllServers] = useState<Server[]>(fallbackServers);
@@ -75,6 +78,9 @@ export default function PlayerPage() {
         ) : (
           <iframe src={iframeSrc} className="w-full h-full" allowFullScreen />
         ))}
+        {site.player_logo_url && (
+          <img src={site.player_logo_url} alt="" className="absolute top-3 right-3 max-h-10 opacity-80 pointer-events-none drop-shadow-lg" />
+        )}
       </div>
 
       <div className="px-4 sm:px-8 mt-4">
@@ -149,11 +155,15 @@ export default function PlayerPage() {
         <h1 className="text-lg font-bold text-foreground mb-1">{title}</h1>
         {mediaType === "tv" && <p className="text-sm text-muted-foreground mb-4">Season {season}, Episode {episode}</p>}
 
-        {/* TV Seasons & Episodes */}
+        <AdSlot slot="post_player_info" />
+
+        <CustomDownloads tmdbId={detail.id} mediaType={mediaType} season={mediaType === "tv" ? season : undefined} episode={mediaType === "tv" ? episode : undefined} />
+
+        {/* TV Seasons & Episodes — with thumbnails */}
         {mediaType === "tv" && detail.seasons && (
           <div className="mb-8 space-y-2">
             {detail.seasons.filter(s => s.season_number > 0).map(s => (
-              <div key={s.id} className="bg-card rounded-lg overflow-hidden">
+              <div key={s.id} className="glass-panel overflow-hidden">
                 <button
                   onClick={() => {
                     setOpenSeason(openSeason === s.season_number ? null : s.season_number);
@@ -161,22 +171,36 @@ export default function PlayerPage() {
                       getSeasonDetail(detail.id, s.season_number).then(r => setEpisodes(r.episodes));
                     }
                   }}
-                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-muted/50 transition-colors"
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-white/5 transition-colors"
                 >
-                  <span>{s.name}</span>
+                  <span className="font-medium">{s.name}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${openSeason === s.season_number ? "rotate-180" : ""}`} />
                 </button>
                 {openSeason === s.season_number && (
-                  <div className="px-4 pb-3 space-y-1">
-                    {episodes.map(ep => (
-                      <Link
-                        key={ep.id}
-                        to={`/watch/tv/${detail.id}?s=${ep.season_number}&e=${ep.episode_number}`}
-                        className={`block px-3 py-2 rounded text-sm transition-colors ${ep.season_number === season && ep.episode_number === episode ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"}`}
-                      >
-                        E{ep.episode_number}. {ep.name}
-                      </Link>
-                    ))}
+                  <div className="px-3 pb-3 space-y-2 border-t border-border/30">
+                    {episodes.map(ep => {
+                      const active = ep.season_number === season && ep.episode_number === episode;
+                      return (
+                        <Link
+                          key={ep.id}
+                          to={`/watch/tv/${detail.id}?s=${ep.season_number}&e=${ep.episode_number}`}
+                          className={`flex gap-3 p-2 rounded-lg transition-colors group ${active ? "bg-primary/10 ring-1 ring-primary/40" : "hover:bg-white/5"}`}
+                        >
+                          <div className="w-24 sm:w-32 aspect-video rounded-md overflow-hidden bg-muted flex-shrink-0 relative">
+                            <img src={img(ep.still_path, "w300")} alt={ep.name} className="w-full h-full object-cover" loading="lazy" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-background/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Play className="w-5 h-5 text-foreground fill-foreground" />
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm truncate font-medium ${active ? "text-primary" : "text-foreground group-hover:text-primary"}`}>
+                              E{ep.episode_number}. {ep.name}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{ep.overview}</p>
+                          </div>
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>

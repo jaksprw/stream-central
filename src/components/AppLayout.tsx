@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Compass, Layers, SlidersHorizontal, Send, Shield } from "lucide-react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Layers, SlidersHorizontal, Send, Shield, Radio } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
 import { useAuth } from "@/hooks/useAuth";
 import AdSlot from "@/components/AdSlot";
@@ -10,15 +10,15 @@ const navItems = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
   { to: "/tv", icon: Tv, label: "TV Shows" },
+  { to: "/live-tv", icon: Radio, label: "Live TV" },
   { to: "/filter", icon: SlidersHorizontal, label: "Filter" },
   { to: "/providers", icon: Layers, label: "Providers" },
-  { to: "/profile", icon: User, label: "Profile" },
 ];
 
 const mobileNav = [
   { to: "/", icon: Home, label: "Home" },
   { to: "/movies", icon: Film, label: "Movies" },
-  { to: "/tv", icon: Tv, label: "TV" },
+  { to: "/live-tv", icon: Radio, label: "Live" },
   { to: "/search", icon: Search, label: "Search" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
@@ -48,7 +48,55 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (site.site_title) document.title = site.site_title;
-  }, [site.site_title]);
+    if (site.site_favicon) {
+      let link: HTMLLinkElement | null = document.querySelector("link[rel~='icon']");
+      if (!link) { link = document.createElement("link"); link.rel = "icon"; document.head.appendChild(link); }
+      link.href = site.site_favicon;
+    }
+  }, [site.site_title, site.site_favicon]);
+
+  // Inject analytics / verification / structured-data / custom CSS / OneSignal once settings load
+  useEffect(() => {
+    const added: HTMLElement[] = [];
+    const append = (tag: string, attrs: Record<string, string>, text?: string) => {
+      const el = document.createElement(tag);
+      Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+      if (text) el.textContent = text;
+      (tag === "link" || tag === "meta" ? document.head : document.body).appendChild(el);
+      added.push(el);
+    };
+    if (site.ga4_id) {
+      append("script", { src: `https://www.googletagmanager.com/gtag/js?id=${site.ga4_id}`, async: "true" });
+      append("script", {}, `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${site.ga4_id}');`);
+    }
+    if (site.gtm_id) {
+      append("script", {}, `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${site.gtm_id}');`);
+    }
+    if (site.fb_pixel) {
+      append("script", {}, `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${site.fb_pixel}');fbq('track','PageView');`);
+    }
+    if (site.google_site_verification) append("meta", { name: "google-site-verification", content: site.google_site_verification });
+    if (site.bing_site_verification) append("meta", { name: "msvalidate.01", content: site.bing_site_verification });
+    if (site.seo_description) {
+      let m = document.querySelector("meta[name='description']") as HTMLMetaElement | null;
+      if (!m) { m = document.createElement("meta"); m.name = "description"; document.head.appendChild(m); added.push(m); }
+      m.content = site.seo_description;
+    }
+    if (site.seo_keywords) append("meta", { name: "keywords", content: site.seo_keywords });
+    if (site.seo_og_image) append("meta", { property: "og:image", content: site.seo_og_image });
+    if (site.jsonld_organization) append("script", { type: "application/ld+json" }, site.jsonld_organization);
+    if (site.jsonld_website) append("script", { type: "application/ld+json" }, site.jsonld_website);
+    if (site.custom_css) append("style", {}, site.custom_css);
+    if (site.onesignal_app_id) {
+      append("script", { src: "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js", defer: "true" });
+      append("script", {}, `window.OneSignalDeferred=window.OneSignalDeferred||[];OneSignalDeferred.push(async function(OneSignal){await OneSignal.init({appId:'${site.onesignal_app_id}'});});`);
+    }
+    if (site.push_html) {
+      const div = document.createElement("div"); div.innerHTML = site.push_html;
+      document.body.appendChild(div); added.push(div);
+    }
+    return () => { added.forEach(el => el.remove()); };
+  }, [site.ga4_id, site.gtm_id, site.fb_pixel, site.google_site_verification, site.bing_site_verification, site.seo_description, site.seo_keywords, site.seo_og_image, site.jsonld_organization, site.jsonld_website, site.custom_css, site.onesignal_app_id, site.push_html]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
