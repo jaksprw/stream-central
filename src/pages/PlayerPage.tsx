@@ -78,6 +78,9 @@ export default function PlayerPage() {
         ) : (
           <iframe src={iframeSrc} className="w-full h-full" allowFullScreen />
         ))}
+        {site.player_logo_url && (
+          <img src={site.player_logo_url} alt="" className="absolute top-3 right-3 max-h-10 opacity-80 pointer-events-none drop-shadow-lg" />
+        )}
       </div>
 
       <div className="px-4 sm:px-8 mt-4">
