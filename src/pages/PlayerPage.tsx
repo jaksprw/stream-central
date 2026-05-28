@@ -16,6 +16,7 @@ export default function PlayerPage() {
   const season = Number(searchParams.get("s")) || 1;
   const episode = Number(searchParams.get("e")) || 1;
   const mediaType = type as "movie" | "tv";
+  const site = useSiteSettings();
 
   const [detail, setDetail] = useState<MovieDetail | null>(null);
   const [allServers, setAllServers] = useState<Server[]>(fallbackServers);
