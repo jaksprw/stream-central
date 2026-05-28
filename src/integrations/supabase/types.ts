@@ -50,6 +50,117 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_downloads: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          episode: number | null
+          id: string
+          label: string
+          media_type: string
+          quality: string | null
+          season: number | null
+          size: string | null
+          sort_order: number
+          tmdb_id: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          episode?: number | null
+          id?: string
+          label: string
+          media_type?: string
+          quality?: string | null
+          season?: number | null
+          size?: string | null
+          sort_order?: number
+          tmdb_id: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          episode?: number | null
+          id?: string
+          label?: string
+          media_type?: string
+          quality?: string | null
+          season?: number | null
+          size?: string | null
+          sort_order?: number
+          tmdb_id?: number
+          url?: string
+        }
+        Relationships: []
+      }
+      custom_pages: {
+        Row: {
+          content_html: string
+          created_at: string
+          enabled: boolean
+          id: string
+          meta_description: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_html?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          meta_description?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_html?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          meta_description?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      live_tv_channels: {
+        Row: {
+          category: string | null
+          created_at: string
+          enabled: boolean
+          id: string
+          logo_url: string | null
+          name: string
+          sort_order: number
+          stream_url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          logo_url?: string | null
+          name: string
+          sort_order?: number
+          stream_url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          stream_url?: string
+        }
+        Relationships: []
+      }
       servers: {
         Row: {
           created_at: string
