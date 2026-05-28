@@ -5,6 +5,8 @@ import { fetchServers, getServerUrl, fallbackServers, type Server } from "@/lib/
 import { toggleWatchlist, isInWatchlist } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
 import AdSlot from "@/components/AdSlot";
+import CustomDownloads from "@/components/CustomDownloads";
+import { useSiteSettings } from "@/lib/siteSettings";
 import { getTrending, type Movie } from "@/lib/tmdb";
 import { Heart, ChevronDown, Server as ServerIcon, Shield, Download, Play } from "lucide-react";
 
