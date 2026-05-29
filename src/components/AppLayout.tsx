@@ -117,7 +117,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {site.site_logo ? (
                 <img src={site.site_logo} alt={site.site_title} className="h-8 w-auto max-w-[140px] object-contain" />
               ) : (
-                <span className="text-gradient">{site.site_title || "CineStream"}</span>
+                <span className="text-foreground">{site.site_title || "CineStream"}</span>
               )}
             </Link>
             <nav className="hidden md:flex items-center gap-1">
@@ -127,13 +127,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   to={n.to}
                   className={`px-3 py-1.5 rounded-full text-sm transition-all ${
                     location.pathname === n.to
-                      ? "text-primary-foreground bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/30"
+                      ? "text-primary-foreground bg-primary shadow-lg shadow-primary/30"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                   }`}
                 >
                   {n.label}
                 </Link>
               ))}
+            </nav>
             </nav>
           </div>
           <div className="flex items-center gap-1">
