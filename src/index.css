@@ -53,6 +53,123 @@
 
     --overlay: 240 30% 4%;
   }
+
+  .light {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 265 90% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 190 95% 55%;
+    --accent-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 265 90% 65%;
+    --overlay: 210 40% 98%;
+  }
+
+  [data-theme="ocean"] {
+    --background: 205 45% 9%;
+    --foreground: 195 100% 95%;
+    --card: 205 35% 13%;
+    --primary: 192 89% 58%;
+    --accent: 199 95% 65%;
+    --border: 205 35% 22%;
+    --muted: 205 30% 15%;
+  }
+
+  [data-theme="rose"] {
+    --background: 330 30% 8%;
+    --foreground: 330 100% 96%;
+    --card: 330 25% 12%;
+    --primary: 330 95% 70%;
+    --accent: 345 95% 68%;
+    --border: 330 25% 18%;
+    --muted: 330 20% 14%;
+  }
+
+  [data-theme="emerald"] {
+    --background: 158 35% 8%;
+    --foreground: 152 100% 96%;
+    --card: 158 28% 12%;
+    --primary: 157 84% 52%;
+    --accent: 174 92% 50%;
+    --border: 158 25% 18%;
+    --muted: 158 22% 14%;
+  }
+
+  [data-theme="sunset"] {
+    --background: 342 35% 9%;
+    --foreground: 30 100% 96%;
+    --card: 342 28% 13%;
+    --primary: 16 92% 62%;
+    --accent: 340 95% 68%;
+    --border: 342 28% 20%;
+    --muted: 342 24% 15%;
+  }
+
+  [data-theme="royal"] {
+    --background: 250 35% 8%;
+    --foreground: 250 100% 96%;
+    --card: 250 25% 13%;
+    --primary: 260 92% 68%;
+    --accent: 220 96% 64%;
+    --border: 250 25% 20%;
+    --muted: 250 20% 15%;
+  }
+
+  [data-theme="crimson"] {
+    --background: 0 35% 8%;
+    --foreground: 0 100% 96%;
+    --card: 0 28% 12%;
+    --primary: 0 92% 62%;
+    --accent: 350 95% 64%;
+    --border: 0 28% 18%;
+    --muted: 0 24% 14%;
+  }
+
+  [data-theme="red"] {
+    --background: 0 20% 6%;
+    --foreground: 0 0% 98%;
+    --card: 0 18% 10%;
+    --popover: 0 18% 10%;
+    --primary: 0 95% 62%;
+    --accent: 8 94% 66%;
+    --border: 0 20% 16%;
+    --muted: 0 18% 12%;
+    --muted-foreground: 0 0% 82%;
+    --glass-bg: 0 18% 10% / 0.72;
+  }
+
+  [data-theme="apple"] {
+    --background: 120 10% 7%;
+    --foreground: 120 0% 98%;
+    --card: 120 8% 11%;
+    --popover: 120 8% 11%;
+    --primary: 137 83% 55%;
+    --accent: 160 87% 48%;
+    --border: 120 8% 18%;
+    --muted: 120 8% 14%;
+    --muted-foreground: 120 0% 82%;
+    --glass-bg: 120 8% 11% / 0.72;
+  }
+
+  [data-theme="amoled"] {
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --primary: 270 95% 72%;
+    --accent: 190 100% 64%;
+    --border: 0 0% 14%;
+    --muted: 0 0% 9%;
+  }
 }
 
 @layer base {

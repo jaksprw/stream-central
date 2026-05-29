@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
-import { getDetail, getSeasonDetail, img, imgLow, type MovieDetail, type Episode } from "@/lib/tmdb";
+import { useParams, Link, useLocation } from "react-router-dom";
+import { getDetail, getSeasonDetail, img, type MovieDetail, type Episode } from "@/lib/tmdb";
 import { toggleWatchlist, isInWatchlist, toggleLiked, isLiked, useSettings } from "@/lib/store";
 import ContentSlider from "@/components/ContentSlider";
 import AdSlot from "@/components/AdSlot";
 import CustomDownloads from "@/components/CustomDownloads";
-import { Play, Heart, Share2, Star, Clock, Calendar, ChevronDown, Bookmark, ThumbsUp, Info } from "lucide-react";
+import { Play, Heart, Share2, Star, ChevronDown, Bookmark, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 export default function DetailPage() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const mediaType = location.pathname.startsWith("/tv") ? "tv" : "movie" as "movie" | "tv";
-  const navigate = useNavigate();
   const [detail, setDetail] = useState<MovieDetail | null>(null);
   const [inWatchlist, setInWatchlist] = useState(false);
   const [liked, setLikedState] = useState(false);
@@ -20,6 +20,8 @@ export default function DetailPage() {
   const [openSeason, setOpenSeason] = useState<number | null>(1);
   const [settings] = useSettings();
   const [showFullOverview, setShowFullOverview] = useState(false);
+  const [trailerOpen, setTrailerOpen] = useState(false);
+  const [selectedTrailerKey, setSelectedTrailerKey] = useState<string | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -83,6 +85,8 @@ export default function DetailPage() {
   const logo = detail.images?.logos?.find(l => l.iso_639_1 === "en" || !l.iso_639_1)?.file_path;
   const trailer = detail.videos?.results?.find(v => v.type === "Trailer" && v.site === "YouTube");
   const trailers = detail.videos?.results?.filter(v => v.site === "YouTube") || [];
+  const activeTrailerKey = selectedTrailerKey || trailer?.key || null;
+  const trailerEmbedSrc = activeTrailerKey ? `https://www.youtube.com/embed/${activeTrailerKey}?autoplay=1&rel=0&modestbranding=1` : "";
   const cast = detail.credits?.cast?.slice(0, 20) || [];
   const directors = detail.credits?.crew?.filter(c => c.job === "Director") || [];
   const similar = detail.similar?.results || [];
@@ -91,66 +95,35 @@ export default function DetailPage() {
 
   return (
     <div className="pb-20">
-      {/* Hero backdrop - full width, video aspect ratio */}
       <div className="relative w-full aspect-video max-h-[75vh]">
         <img src={bgSrc} alt={title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
-
-        {/* Content overlay - desktop/tablet only */}
         <div className="hidden sm:block absolute bottom-0 left-0 right-0 p-4 sm:p-8 md:p-12">
           <div className="flex items-end gap-4 sm:gap-6">
-            {/* Poster */}
-            <img
-              src={img(detail.poster_path, "w342")}
-              alt={title}
-              className="w-28 md:w-36 lg:w-44 rounded-xl shadow-2xl -mb-16 relative z-10 border border-border/20"
-            />
+            <img src={img(detail.poster_path, "w342")} alt={title} className="w-28 md:w-36 lg:w-44 rounded-xl shadow-2xl -mb-16 relative z-10 border border-border/20" />
             <div className="flex-1 mb-2">
-              {logo ? (
-                <img src={img(logo, "w300")} alt={title} className="max-w-[150px] h-auto mb-3 drop-shadow-lg" />
-              ) : (
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 drop-shadow-lg">{title}</h1>
-              )}
-              {detail.tagline && (
-                <p className="text-muted-foreground text-sm italic mb-3">{detail.tagline}</p>
-              )}
+              {logo ? <img src={img(logo, "w300")} alt={title} className="max-w-[150px] h-auto mb-3 drop-shadow-lg" /> : <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 drop-shadow-lg">{title}</h1>}
+              {detail.tagline && <p className="text-muted-foreground text-sm italic mb-3">{detail.tagline}</p>}
               <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground mb-3">
-                {detail.vote_average > 0 && (
-                  <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                    <Star className="w-3.5 h-3.5 fill-yellow-500" />
-                    {detail.vote_average.toFixed(1)}
-                  </span>
-                )}
+                {detail.vote_average > 0 && <span className="flex items-center gap-1 text-yellow-500 font-medium"><Star className="w-3.5 h-3.5 fill-yellow-500" />{detail.vote_average.toFixed(1)}</span>}
                 {year && <span>{year}</span>}
                 {detail.runtime > 0 && <span>{Math.floor(detail.runtime / 60)}h {detail.runtime % 60}m</span>}
                 {detail.number_of_seasons && <span>{detail.number_of_seasons} Seasons</span>}
-                {detail.status && (
-                  <span className="bg-muted/80 px-2 py-0.5 rounded text-xs">{detail.status}</span>
-                )}
+                {detail.status && <span className="bg-muted/80 px-2 py-0.5 rounded text-xs">{detail.status}</span>}
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main content */}
       <div className="px-4 sm:px-8 md:px-12 mt-4 sm:mt-20">
-        {/* Mobile poster + logo/title side-by-side */}
         <div className="sm:hidden flex items-start gap-3 mb-4 -mt-20 relative z-10">
           <img src={img(detail.poster_path, "w185")} alt={title} className="w-24 rounded-lg shadow-2xl border border-border/20 flex-shrink-0" />
           <div className="flex-1 min-w-0 pt-2">
-            {logo ? (
-              <img src={img(logo, "w300")} alt={title} className="max-w-[140px] h-auto mb-2 drop-shadow-lg" />
-            ) : (
-              <h1 className="text-lg font-bold text-foreground line-clamp-2">{title}</h1>
-            )}
+            {logo ? <img src={img(logo, "w300")} alt={title} className="max-w-[140px] h-auto mb-2 drop-shadow-lg" /> : <h1 className="text-lg font-bold text-foreground line-clamp-2">{title}</h1>}
             <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-              {detail.vote_average > 0 && (
-                <span className="flex items-center gap-0.5 text-yellow-500">
-                  <Star className="w-3 h-3 fill-yellow-500" />{detail.vote_average.toFixed(1)}
-                </span>
-              )}
+              {detail.vote_average > 0 && <span className="flex items-center gap-0.5 text-yellow-500"><Star className="w-3 h-3 fill-yellow-500" />{detail.vote_average.toFixed(1)}</span>}
               {year && <span>{year}</span>}
               {detail.runtime > 0 && <span>{detail.runtime}min</span>}
               {detail.number_of_seasons && <span>{detail.number_of_seasons} Seasons</span>}
@@ -158,114 +131,34 @@ export default function DetailPage() {
           </div>
         </div>
 
-        {/* Action buttons - icon only */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
-          <Link
-            to={`/watch/${mediaType}/${detail.id}`}
-            aria-label="Watch now"
-            className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
-          >
-            <Play className="w-5 h-5 fill-current" />
-          </Link>
-          {trailer && (
-            <a
-              href={`https://www.youtube.com/watch?v=${trailer.key}`}
-              target="_blank"
-              rel="noopener"
-              aria-label="Trailer"
-              className="inline-flex items-center justify-center bg-secondary text-secondary-foreground p-2.5 rounded-lg hover:bg-secondary/80 transition-colors"
-            >
-              <Play className="w-5 h-5" />
-            </a>
-          )}
-          <button
-            onClick={handleWatchlist}
-            aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"}
-            className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${
-              inWatchlist ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Bookmark className={`w-5 h-5 ${inWatchlist ? "fill-primary" : ""}`} />
-          </button>
-          <button
-            onClick={handleLike}
-            aria-label={liked ? "Unlike" : "Like"}
-            className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${
-              liked ? "bg-red-500/20 text-red-500" : "bg-muted text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Heart className={`w-5 h-5 ${liked ? "fill-red-500" : ""}`} />
-          </button>
-          <button
-            onClick={handleShare}
-            aria-label="Share"
-            className="inline-flex items-center justify-center bg-muted text-muted-foreground p-2.5 rounded-lg hover:text-foreground transition-colors"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
+          <Link to={`/watch/${mediaType}/${detail.id}`} aria-label="Watch now" className="inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-lg hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"><Play className="w-5 h-5 fill-current" /></Link>
+          {trailer && <button type="button" onClick={() => { setSelectedTrailerKey(trailer.key); setTrailerOpen(true); }} aria-label="Play trailer" className="inline-flex items-center justify-center bg-secondary text-secondary-foreground p-2.5 rounded-lg hover:bg-secondary/80 transition-colors"><Play className="w-5 h-5" /></button>}
+          <button onClick={handleWatchlist} aria-label={inWatchlist ? "Remove from watchlist" : "Add to watchlist"} className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${inWatchlist ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground hover:text-foreground"}`}><Bookmark className={`w-5 h-5 ${inWatchlist ? "fill-primary" : ""}`} /></button>
+          <button onClick={handleLike} aria-label={liked ? "Unlike" : "Like"} className={`inline-flex items-center justify-center p-2.5 rounded-lg transition-colors ${liked ? "bg-red-500/20 text-red-500" : "bg-muted text-muted-foreground hover:text-foreground"}`}><Heart className={`w-5 h-5 ${liked ? "fill-red-500" : ""}`} /></button>
+          <button onClick={handleShare} aria-label="Share" className="inline-flex items-center justify-center bg-muted text-muted-foreground p-2.5 rounded-lg hover:text-foreground transition-colors"><Share2 className="w-5 h-5" /></button>
         </div>
 
         <AdSlot slot="detail_top" />
-        <CustomDownloads tmdbId={detail.id} mediaType={mediaType} />
-        {/* Overview */}
+        <CustomDownloads tmdbId={detail.id} mediaType={mediaType} availableSeasons={detail.seasons?.filter(season => season.season_number > 0)} />
         <div className="mb-6">
-          <p className={`text-foreground/90 text-sm leading-relaxed ${!showFullOverview ? "line-clamp-3" : ""}`}>
-            {detail.overview}
-          </p>
-          {detail.overview && detail.overview.length > 200 && (
-            <button onClick={() => setShowFullOverview(!showFullOverview)} className="text-primary text-xs mt-1 hover:text-primary/80">
-              {showFullOverview ? "Show less" : "Show more"}
-            </button>
-          )}
+          <p className={`text-foreground/90 text-sm leading-relaxed ${!showFullOverview ? "line-clamp-3" : ""}`}>{detail.overview}</p>
+          {detail.overview && detail.overview.length > 200 && <button onClick={() => setShowFullOverview(!showFullOverview)} className="text-primary text-xs mt-1 hover:text-primary/80">{showFullOverview ? "Show less" : "Show more"}</button>}
         </div>
 
-        {/* Details grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="space-y-3 text-sm">
-            {detail.genres?.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {detail.genres.map(g => (
-                  <Link
-                    key={g.id}
-                    to={`/genre/${mediaType}/${g.id}?name=${g.name}`}
-                    className="bg-muted hover:bg-muted/80 px-3 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {g.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-            {directors.length > 0 && (
-              <p className="text-muted-foreground">
-                <span className="text-foreground/70">Director:</span> {directors.map(d => d.name).join(", ")}
-              </p>
-            )}
-            {detail.spoken_languages?.length > 0 && (
-              <p className="text-muted-foreground">
-                <span className="text-foreground/70">Language:</span> {detail.spoken_languages.map(l => l.english_name).join(", ")}
-              </p>
-            )}
+            {detail.genres?.length > 0 && <div className="flex flex-wrap gap-1.5">{detail.genres.map(g => <Link key={g.id} to={`/genre/${mediaType}/${g.id}?name=${g.name}`} className="bg-muted hover:bg-muted/80 px-3 py-1 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors">{g.name}</Link>)}</div>}
+            {directors.length > 0 && <p className="text-muted-foreground"><span className="text-foreground/70">Director:</span> {directors.map(d => d.name).join(", ")}</p>}
+            {detail.spoken_languages?.length > 0 && <p className="text-muted-foreground"><span className="text-foreground/70">Language:</span> {detail.spoken_languages.map(l => l.english_name).join(", ")}</p>}
           </div>
           <div className="space-y-3 text-sm">
-            {detail.production_companies?.length > 0 && (
-              <p className="text-muted-foreground">
-                <span className="text-foreground/70">Production:</span> {detail.production_companies.map(p => p.name).join(", ")}
-              </p>
-            )}
-            {detail.budget > 0 && (
-              <p className="text-muted-foreground">
-                <span className="text-foreground/70">Budget:</span> ${(detail.budget / 1_000_000).toFixed(0)}M
-              </p>
-            )}
-            {detail.revenue > 0 && (
-              <p className="text-muted-foreground">
-                <span className="text-foreground/70">Revenue:</span> ${(detail.revenue / 1_000_000).toFixed(0)}M
-              </p>
-            )}
+            {detail.production_companies?.length > 0 && <p className="text-muted-foreground"><span className="text-foreground/70">Production:</span> {detail.production_companies.map(p => p.name).join(", ")}</p>}
+            {detail.budget > 0 && <p className="text-muted-foreground"><span className="text-foreground/70">Budget:</span> ${(detail.budget / 1_000_000).toFixed(0)}M</p>}
+            {detail.revenue > 0 && <p className="text-muted-foreground"><span className="text-foreground/70">Revenue:</span> ${(detail.revenue / 1_000_000).toFixed(0)}M</p>}
           </div>
         </div>
 
-        {/* Section anchors */}
         <div className="flex gap-4 mb-8 overflow-x-auto slider-container text-sm border-b border-border pb-2">
           {cast.length > 0 && <a href="#cast" className="text-muted-foreground hover:text-primary whitespace-nowrap transition-colors pb-2">Cast</a>}
           {mediaType === "tv" && <a href="#seasons" className="text-muted-foreground hover:text-primary whitespace-nowrap transition-colors pb-2">Seasons</a>}
@@ -273,7 +166,6 @@ export default function DetailPage() {
           {similar.length > 0 && <a href="#related" className="text-muted-foreground hover:text-primary whitespace-nowrap transition-colors pb-2">Related</a>}
         </div>
 
-        {/* Cast */}
         {cast.length > 0 && (
           <section id="cast" className="mb-8">
             <h2 className="text-lg font-semibold text-foreground mb-4">Cast</h2>
@@ -291,7 +183,7 @@ export default function DetailPage() {
           </section>
         )}
 
-        {/* Seasons & Episodes (TV) */}
+
         {mediaType === "tv" && detail.seasons && (
           <section id="seasons" className="mb-8">
             <h2 className="text-lg font-semibold text-foreground mb-4">Seasons & Episodes</h2>
@@ -303,9 +195,7 @@ export default function DetailPage() {
                     className="w-full flex items-center justify-between px-4 py-3 text-sm text-foreground hover:bg-muted/50 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      {season.poster_path && (
-                        <img src={img(season.poster_path, "w92")} alt={season.name} className="w-10 h-14 rounded object-cover" />
-                      )}
+                      {season.poster_path && <img src={img(season.poster_path, "w92")} alt={season.name} className="w-10 h-14 rounded object-cover" />}
                       <div className="text-left">
                         <span className="font-medium">{season.name}</span>
                         <p className="text-xs text-muted-foreground">{season.episode_count} episodes</p>
@@ -316,11 +206,7 @@ export default function DetailPage() {
                   {openSeason === season.season_number && selectedSeason === season.season_number && (
                     <div className="px-4 pb-3 space-y-2 border-t border-border/30">
                       {episodes.map(ep => (
-                        <Link
-                          key={ep.id}
-                          to={`/watch/tv/${detail.id}?s=${ep.season_number}&e=${ep.episode_number}`}
-                          className="flex gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group"
-                        >
+                        <Link key={ep.id} to={`/watch/tv/${detail.id}?s=${ep.season_number}&e=${ep.episode_number}`} className="flex gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors group">
                           <div className="w-28 aspect-video rounded-lg overflow-hidden bg-muted flex-shrink-0 relative">
                             <img src={img(ep.still_path, "w300")} alt={ep.name} className="w-full h-full object-cover" loading="lazy" />
                             <div className="absolute inset-0 flex items-center justify-center bg-background/30 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -328,18 +214,11 @@ export default function DetailPage() {
                             </div>
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors font-medium">
-                              E{ep.episode_number}. {ep.name}
-                            </p>
+                            <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors font-medium">E{ep.episode_number}. {ep.name}</p>
                             <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{ep.overview}</p>
                             <div className="flex gap-2 mt-1 text-xs text-muted-foreground">
                               {ep.runtime && <span>{ep.runtime}min</span>}
-                              {ep.vote_average > 0 && (
-                                <span className="flex items-center gap-0.5">
-                                  <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                                  {ep.vote_average.toFixed(1)}
-                                </span>
-                              )}
+                              {ep.vote_average > 0 && <span className="flex items-center gap-0.5"><Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />{ep.vote_average.toFixed(1)}</span>}
                             </div>
                           </div>
                         </Link>
@@ -352,13 +231,21 @@ export default function DetailPage() {
           </section>
         )}
 
-        {/* Trailers */}
+
         {trailers.length > 0 && (
           <section id="trailers" className="mb-8">
             <h2 className="text-lg font-semibold text-foreground mb-4">Trailers & Videos</h2>
             <div className="flex gap-3 overflow-x-auto slider-container pb-2">
               {trailers.slice(0, 8).map(v => (
-                <a key={v.id} href={`https://www.youtube.com/watch?v=${v.key}`} target="_blank" rel="noopener" className="flex-shrink-0 w-64 sm:w-72 group">
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedTrailerKey(v.key);
+                    setTrailerOpen(true);
+                  }}
+                  className="flex-shrink-0 w-64 sm:w-72 group text-left"
+                >
                   <div className="aspect-video rounded-xl overflow-hidden bg-muted relative">
                     <img src={`https://img.youtube.com/vi/${v.key}/mqdefault.jpg`} alt={v.name} className="w-full h-full object-cover" loading="lazy" />
                     <div className="absolute inset-0 flex items-center justify-center bg-background/40 group-hover:bg-background/20 transition-colors">
@@ -368,14 +255,23 @@ export default function DetailPage() {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1.5 truncate">{v.name}</p>
-                </a>
+                </button>
               ))}
             </div>
           </section>
         )}
+
       </div>
 
-      {/* Related */}
+      <Dialog open={trailerOpen} onOpenChange={setTrailerOpen}>
+        <DialogContent className="max-w-6xl border-border bg-black/95 text-white shadow-2xl">
+          <DialogHeader className="border-b border-white/10 pb-3">
+            <DialogTitle className="flex items-center justify-between text-white"><span>{title} — Trailer</span><button type="button" onClick={() => setTrailerOpen(false)} className="rounded-full p-2 text-white/80 hover:bg-white/10 hover:text-white"><X className="h-4 w-4" /></button></DialogTitle>
+          </DialogHeader>
+          <div className="aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">{trailerEmbedSrc ? <iframe src={trailerEmbedSrc} title={`${title} trailer`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen className="h-full w-full" /> : <div className="flex h-full items-center justify-center text-sm text-white/70">Trailer unavailable</div>}</div>
+        </DialogContent>
+      </Dialog>
+
       {recommendations.length > 0 && (
         <section id="related">
           <ContentSlider title="Recommended" items={recommendations} type={mediaType} />

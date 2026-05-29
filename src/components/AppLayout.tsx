@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Layers, SlidersHorizontal, Send, Shield, Radio } from "lucide-react";
+import { Search, Home, Film, Tv, User, Menu, X, Heart, ChevronDown, Layers, SlidersHorizontal, Send, Shield, Radio, Palette, SunMedium, MoonStar } from "lucide-react";
 import { getGenres, type Genre } from "@/lib/tmdb";
 import { useAuth } from "@/hooks/useAuth";
 import AdSlot from "@/components/AdSlot";
 import { useSiteSettings } from "@/lib/siteSettings";
+import { useTheme } from "next-themes";
 
 const navItems = [
   { to: "/", icon: Home, label: "Home" },
@@ -35,6 +36,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [tvGenres, setTvGenres] = useState<Genre[]>([]);
   const [showMovieGenres, setShowMovieGenres] = useState(false);
   const [showTvGenres, setShowTvGenres] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     getGenres("movie").then(r => setMovieGenres(r.genres));
@@ -45,6 +48,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false);
     setSearchOpen(false);
   }, [location.pathname]);
+
+  const themePresets = [
+    { key: "classic", label: "Classic", accent: "#8b5cf6" },
+    { key: "ocean", label: "Ocean Blue", accent: "#38bdf8" },
+    { key: "rose", label: "Rose Pink", accent: "#f472b6" },
+    { key: "emerald", label: "Emerald", accent: "#34d399" },
+    { key: "sunset", label: "Sunset", accent: "#fb7185" },
+    { key: "royal", label: "Royal Purple", accent: "#8b5cf6" },
+    { key: "crimson", label: "Crimson Red", accent: "#ef4444" },
+    { key: "red", label: "Red Pulse", accent: "#ff3b30" },
+    { key: "apple", label: "Apple UI", accent: "#30d158" },
+    { key: "amoled", label: "AMOLED Black", accent: "#a78bfa" },
+  ];
+
+  useEffect(() => {
+    const saved = localStorage.getItem("site-theme-palette") || "classic";
+    document.documentElement.dataset.theme = saved;
+  }, []);
 
   useEffect(() => {
     if (site.site_title) document.title = site.site_title;
@@ -158,7 +179,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link to="/filter" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Filter">
                   <SlidersHorizontal className="w-5 h-5 text-muted-foreground" />
                 </Link>
-                <Link to="/watchlist" className="p-2 hover:bg-muted rounded-full transition-colors" aria-label="Watchlist">
+                <Link to="/watchlist" className="hidden md:flex p-2 hover:bg-muted rounded-full transition-colors" aria-label="Watchlist">
                   <Heart className="w-5 h-5 text-muted-foreground" />
                 </Link>
                 {site.telegram_url && (
@@ -166,12 +187,53 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     href={site.telegram_url}
                     target="_blank"
                     rel="noopener"
-                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                    className="hidden md:flex p-2 hover:bg-muted rounded-full transition-colors"
                     aria-label="Telegram"
                   >
                     <Send className="w-5 h-5 text-muted-foreground" />
                   </a>
                 )}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setThemeMenuOpen(v => !v)}
+                    className="p-2 hover:bg-muted rounded-full transition-colors"
+                    aria-label="Theme options"
+                  >
+                    <Palette className="w-5 h-5 text-muted-foreground" />
+                  </button>
+                  {themeMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-72 rounded-2xl border border-border bg-card p-3 shadow-2xl z-50">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">Themes</p>
+                        <button type="button" onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] text-foreground">
+                          {theme === "dark" ? <MoonStar className="w-3.5 h-3.5" /> : <SunMedium className="w-3.5 h-3.5" />}
+                          {theme === "dark" ? "Dark" : "Light"}
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {themePresets.map(item => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => {
+                              document.documentElement.dataset.theme = item.key;
+                              document.documentElement.style.colorScheme = item.key === "apple" ? "dark" : "dark";
+                              localStorage.setItem("site-theme-palette", item.key);
+                              setThemeMenuOpen(false);
+                            }}
+                            className="rounded-xl border border-border bg-background/70 p-2 text-left text-xs text-foreground hover:border-primary/50 transition-colors"
+                          >
+                            <span className="mb-1 flex items-center gap-2">
+                              <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.accent }} />
+                              {item.label}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             )}
             <button className="md:hidden p-2 hover:bg-muted rounded-full transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menu">

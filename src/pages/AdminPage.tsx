@@ -313,6 +313,7 @@ function AdsTab({ rows, setRows }: { rows: AdRow[]; setRows: (r: AdRow[]) => voi
 function DownloadsTab({ rows, setRows }: { rows: DownloadRow[]; setRows: (r: DownloadRow[]) => void }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
+  const [bulkText, setBulkText] = useState("");
   const searchTmdb = async () => {
     if (!query.trim()) return;
     const r = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
@@ -343,6 +344,41 @@ function DownloadsTab({ rows, setRows }: { rows: DownloadRow[]; setRows: (r: Dow
     if (!d.id.startsWith("new-")) await supabase.from("custom_downloads").delete().eq("id", d.id);
     setRows(rows.filter(x => x.id !== d.id));
   };
+  const importBulkDownloads = async () => {
+    const lines = bulkText
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean);
+
+    if (!lines.length) return toast.error("Paste at least one download entry first.");
+
+    const parsed = lines.map((line, index) => {
+      const [tmdbIdRaw = "", mediaType = "movie", seasonRaw = "", episodeRaw = "", label = "", url = "", quality = "", size = ""] = line.split("|");
+      const tmdb_id = Number(tmdbIdRaw);
+      return {
+        tmdb_id: Number.isFinite(tmdb_id) ? tmdb_id : 0,
+        media_type: mediaType || "movie",
+        season: seasonRaw ? Number(seasonRaw) : null,
+        episode: episodeRaw ? Number(episodeRaw) : null,
+        label: label || `Download ${index + 1}`,
+        url: url.trim(),
+        quality: quality || null,
+        size: size || null,
+        sort_order: rows.length + index + 1,
+        enabled: true,
+      };
+    });
+
+    const invalid = parsed.find(item => !item.tmdb_id || !item.url);
+    if (invalid) return toast.error("Each row needs a valid TMDB ID and URL.");
+
+    const { data, error } = await supabase.from("custom_downloads").insert(parsed).select();
+    if (error) return toast.error(error.message);
+
+    setRows([...(data as DownloadRow[]), ...rows]);
+    setBulkText("");
+    toast.success(`Imported ${parsed.length} download link${parsed.length > 1 ? "s" : ""}.`);
+  };
   return (
     <Section title="Custom Downloads" onAdd={addBlank}>
       <div className="glass-panel p-4 space-y-3">
@@ -365,6 +401,17 @@ function DownloadsTab({ rows, setRows }: { rows: DownloadRow[]; setRows: (r: Dow
             ))}
           </div>
         )}
+      </div>
+
+      <div className="glass-panel p-4 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Bulk add downloads</h3>
+            <p className="text-[11px] text-muted-foreground">Format: tmdb_id|movie|season|episode|label|url|quality|size</p>
+          </div>
+          <button onClick={importBulkDownloads} className="bg-primary text-primary-foreground px-3 py-2 rounded-md text-xs">Import rows</button>
+        </div>
+        <textarea value={bulkText} onChange={e => setBulkText(e.target.value)} rows={5} placeholder="12345|tv|1|1|S1E1 1080p|https://example.com/file.mp4|1080p|1.2GB" className="filter-select font-mono text-xs" />
       </div>
 
       {rows.map(d => (
