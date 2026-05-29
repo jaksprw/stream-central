@@ -135,7 +135,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               ))}
             </nav>
-            </nav>
           </div>
           <div className="flex items-center gap-1">
             {searchOpen ? (
